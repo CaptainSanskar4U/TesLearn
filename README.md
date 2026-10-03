@@ -119,6 +119,16 @@ The backend is already shaped for humans-in-the-loop:
 
 ---
 
+## 🔑 API keys (pick one — both supported)
+
+| Key | Get it at | Unlocks |
+|-----|-----------|---------|
+| `OPENROUTER_API_KEY` | https://openrouter.ai/keys (free models, no card) | Everything text/HTML/JSON: video, lab, mindmap, notes text, podcast + comic scripts, tutor chat |
+| `GEMINI_API_KEY` | https://aistudio.google.com/app/apikey | Same via Google direct: set `LLM_MODEL=gemini/gemini-2.0-flash`. Also powers image generation (`IMAGE_MODEL`), podcast voice is separate |
+| `REPLICATE_API_TOKEN` | https://replicate.com/account/api-tokens | Podcast MP3 audio (MiniMax TTS) |
+
+> The app auto-detects the provider from `LLM_MODEL`: `openrouter/...` uses the OpenRouter key, `gemini/...` uses the Gemini key, with automatic fallback to `LLM_FALLBACK`. Image models (`generate_panel_image`) and live mic sessions (`viva`/`screen`) use the Gemini key path.
+
 ## ⚡ Quickstart (60 seconds)
 
 **Prerequisites:** Python 3.13+ · an [OpenRouter key](https://openrouter.ai/keys) (free models, no card).
@@ -127,6 +137,7 @@ The backend is already shaped for humans-in-the-loop:
 # 1. Configure
 copy .env.example .env
 # → put your key in .env: OPENROUTER_API_KEY=sk-or-v1-...
+#   (or GEMINI_API_KEY=... with LLM_MODEL=gemini/gemini-2.0-flash — see .env.example)
 
 # 2. Lean install (fast: skips mic/camera system deps)
 uv venv .venv-fast --python 3.13
