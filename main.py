@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from pathlib import Path
@@ -52,3 +53,8 @@ app.mount("/ui", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend"
 @app.get("/health")
 def health():
     return {"ok": True}
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    return RedirectResponse("/ui/")
