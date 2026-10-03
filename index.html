@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photosynthesis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/MotionPathPlugin.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/TextPlugin.min.js"></script>
+  <script>gsap.registerPlugin(MotionPathPlugin, TextPlugin);</script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            background: "rgb(var(--background) / <alpha-value>)",
+            foreground: "rgb(var(--foreground) / <alpha-value>)",
+            card: "rgb(var(--card) / <alpha-value>)",
+            primary: "rgb(var(--primary) / <alpha-value>)",
+            border: "rgb(var(--border) / <alpha-value>)",
+            "muted-foreground": "rgb(var(--muted-foreground) / <alpha-value>)",
+            "chart-1": "rgb(var(--chart-1) / <alpha-value>)",
+            "chart-2": "rgb(var(--chart-2) / <alpha-value>)",
+            "chart-3": "rgb(var(--chart-3) / <alpha-value>)",
+            "chart-4": "rgb(var(--chart-1) / <alpha-value>)",
+            "chart-5": "rgb(var(--chart-2) / <alpha-value>)",
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', "sans-serif"],
+            serif: ['"Source Serif 4"', "serif"],
+            mono: ['"JetBrains Mono"', "monospace"],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      --background: 28 36 51;
+      --foreground: 229 229 229;
+      --card: 42 48 64;
+      --primary: 224 93 56;
+      --muted-foreground: 163 163 163;
+      --border: 61 67 84;
+      --chart-1: 134 167 200;
+      --chart-2: 230 160 143;
+      --chart-3: 90 124 166;
+    }
+    html, body {
+      margin: 0;
+      background: rgb(14, 18, 28);
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #stage {
+      width: min(100vw, calc(100vh * 16 / 9));
+      height: min(100vh, calc(100vw * 9 / 16));
+      position: relative;
+      overflow: hidden;
+    }
+    #root-clip { transform-origin: top left; }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <div
+      id="root-clip"
+      class="absolute w-[1920px] h-[1080px] origin-top-left top-0 left-0 bg-background text-foreground"
+      data-composition-id="clip"
+      data-width="1920"
+      data-height="1080"
+      data-start="0"
+      data-duration="12"
+    >
+      <p id="hook" class="absolute left-[160px] top-[120px] font-serif text-[72px] leading-tight font-bold tracking-tight max-w-[1600px]">
+        Do you know how plants make food?
+      </p>
+      <p id="hook-sub" class="absolute left-[160px] top-[230px] font-sans text-[28px] text-muted-foreground">
+        From sunlight → sugar. Let's see.
+      </p>
+
+      <svg id="scene-plant" class="absolute left-[120px] top-[320px]" width="1680" height="640" viewBox="0 0 1680 640" fill="none">
+        <g id="sun">
+          <circle cx="220" cy="140" r="70" fill="rgb(224, 93, 56)" opacity="0.95" />
+          <path id="sun-rays" d="M220 40 L220 10 M300 60 L325 35 M340 140 L380 140 M300 220 L325 245 M220 240 L220 280 M140 220 L115 245 M100 140 L60 140 M140 60 L115 35"
+            stroke="rgb(230, 160, 143)" stroke-width="8" stroke-linecap="round" />
+        </g>
+
+        <path id="light-path" d="M290 160 C420 180, 520 220, 640 280" stroke="rgb(230, 160, 143)" stroke-width="4" stroke-dasharray="10 12" />
+        <circle id="photon" r="10" fill="rgb(224, 93, 56)" />
+
+        <path id="stem" d="M780 560 C780 460, 760 380, 720 300" stroke="rgb(90, 124, 166)" stroke-width="18" stroke-linecap="round" />
+        <path id="leaf" d="M720 300 C820 220, 980 240, 1040 320 C960 380, 820 400, 720 300 Z"
+          fill="rgb(90, 124, 166)" stroke="rgb(134, 167, 200)" stroke-width="4" />
+        <path id="leaf-vein" d="M760 310 C860 300, 940 310, 1000 330" stroke="rgb(134, 167, 200)" stroke-width="3" />
+
+        <g id="co2">
+          <rect x="1180" y="80" width="160" height="72" rx="16" fill="rgb(42, 48, 64)" stroke="rgb(61, 67, 84)" stroke-width="3" />
+          <text x="1260" y="126" text-anchor="middle" fill="rgb(134, 167, 200)" font-family="JetBrains Mono" font-size="32" font-weight="500">CO₂</text>
+        </g>
+        <path id="co2-path" d="M1260 152 C1260 220, 980 240, 900 300" stroke="rgb(134, 167, 200)" stroke-width="3" stroke-dasharray="8 10" />
+        <circle id="co2-dot" r="8" fill="rgb(134, 167, 200)" />
+
+        <g id="h2o">
+          <rect x="1180" y="420" width="160" height="72" rx="16" fill="rgb(42, 48, 64)" stroke="rgb(61, 67, 84)" stroke-width="3" />
+          <text x="1260" y="466" text-anchor="middle" fill="rgb(134, 167, 200)" font-family="JetBrains Mono" font-size="32" font-weight="500">H₂O</text>
+        </g>
+        <path id="h2o-path" d="M1180 456 C1040 456, 900 420, 820 360" stroke="rgb(134, 167, 200)" stroke-width="3" stroke-dasharray="8 10" />
+        <circle id="h2o-dot" r="8" fill="rgb(134, 167, 200)" />
+
+        <g id="glucose">
+          <rect x="1380" y="220" width="220" height="80" rx="18" fill="rgb(42, 48, 64)" stroke="rgb(224, 93, 56)" stroke-width="3" />
+          <text x="1490" y="270" text-anchor="middle" fill="rgb(229, 229, 229)" font-family="Plus Jakarta Sans" font-size="30" font-weight="700">Glucose</text>
+        </g>
+        <g id="oxygen">
+          <rect x="1380" y="330" width="220" height="80" rx="18" fill="rgb(42, 48, 64)" stroke="rgb(134, 167, 200)" stroke-width="3" />
+          <text x="1490" y="380" text-anchor="middle" fill="rgb(134, 167, 200)" font-family="JetBrains Mono" font-size="30" font-weight="500">O₂</text>
+        </g>
+        <path id="out-path" d="M1040 320 C1180 300, 1280 280, 1380 260" stroke="rgb(224, 93, 56)" stroke-width="4" />
+        <path id="o2-path" d="M1000 300 C1140 340, 1280 360, 1380 370" stroke="rgb(134, 167, 200)" stroke-width="3" />
+      </svg>
+
+      <p id="caption-1" class="absolute left-[160px] top-[980px] font-sans text-[36px] font-bold text-foreground">
+        Sunlight + CO₂ + water → sugar + oxygen
+      </p>
+
+      <div id="equation" class="absolute left-[160px] top-[480px] flex items-center gap-6 font-mono text-[40px]">
+        <span id="eq-light" class="px-5 py-3 rounded-2xl bg-card border border-border text-primary">☀ light</span>
+        <span id="eq-plus1" class="text-muted-foreground">+</span>
+        <span id="eq-co2" class="px-5 py-3 rounded-2xl bg-card border border-border text-chart-1">6CO₂</span>
+        <span id="eq-plus2" class="text-muted-foreground">+</span>
+        <span id="eq-h2o" class="px-5 py-3 rounded-2xl bg-card border border-border text-chart-1">6H₂O</span>
+        <span id="eq-arrow" class="text-primary text-[48px]">→</span>
+        <span id="eq-sugar" class="px-5 py-3 rounded-2xl bg-card border border-primary text-foreground">C₆H₁₂O₆</span>
+        <span id="eq-plus3" class="text-muted-foreground">+</span>
+        <span id="eq-o2" class="px-5 py-3 rounded-2xl bg-card border border-border text-chart-1">6O₂</span>
+      </div>
+
+      <p id="close" class="absolute left-[160px] top-[420px] font-serif text-[64px] font-bold max-w-[1500px]">
+        Plants turn light into life.
+      </p>
+      <p id="close-sub" class="absolute left-[160px] top-[520px] font-sans text-[28px] text-muted-foreground">
+        That's photosynthesis.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function fit() {
+      const stage = document.getElementById("stage");
+      const root = document.getElementById("root-clip");
+      const scale = Math.min(stage.clientWidth / 1920, stage.clientHeight / 1080);
+      root.style.transform = "scale(" + scale + ")";
+    }
+    fit();
+    window.addEventListener("resize", fit);
+
+    function prepDraw(sel) {
+      document.querySelectorAll(sel).forEach((el) => {
+        const len = el.getTotalLength ? el.getTotalLength() : 400;
+        el.style.strokeDasharray = String(len);
+        el.style.strokeDashoffset = String(len);
+      });
+    }
+    prepDraw("#sun-rays, #light-path, #stem, #leaf-vein, #co2-path, #h2o-path, #out-path, #o2-path");
+
+    gsap.set(["#hook", "#hook-sub", "#scene-plant", "#caption-1", "#equation", "#close", "#close-sub"], { autoAlpha: 0 });
+    gsap.set(["#leaf", "#sun", "#co2", "#h2o", "#glucose", "#oxygen"], { autoAlpha: 0, scale: 0.85, transformOrigin: "50% 50%" });
+    gsap.set(["#photon", "#co2-dot", "#h2o-dot"], { autoAlpha: 0 });
+    gsap.set(["#eq-light", "#eq-plus1", "#eq-co2", "#eq-plus2", "#eq-h2o", "#eq-arrow", "#eq-sugar", "#eq-plus3", "#eq-o2"], { autoAlpha: 0, y: 24 });
+
+    const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+
+    tl.to("#hook", { autoAlpha: 1, duration: 0.7 }, 0)
+      .from("#hook", { y: 30, duration: 0.7 }, 0)
+      .to("#hook-sub", { autoAlpha: 1, duration: 0.5 }, 0.6)
+      .to(["#hook", "#hook-sub"], { autoAlpha: 0, y: -20, duration: 0.45 }, 2.0);
+
+    tl.to("#scene-plant", { autoAlpha: 1, duration: 0.3 }, 2.2)
+      .to("#sun", { autoAlpha: 1, scale: 1, duration: 0.5 }, 2.3)
+      .to("#sun-rays", { strokeDashoffset: 0, duration: 0.8 }, 2.5)
+      .to("#stem", { strokeDashoffset: 0, duration: 0.7 }, 2.8)
+      .to("#leaf", { autoAlpha: 1, scale: 1, duration: 0.55 }, 3.2)
+      .to("#leaf-vein", { strokeDashoffset: 0, duration: 0.5 }, 3.5)
+      .to("#light-path", { strokeDashoffset: 0, duration: 0.6 }, 3.7)
+      .to("#photon", { autoAlpha: 1, duration: 0.15 }, 3.7)
+      .to("#photon", {
+        duration: 1.1,
+        ease: "none",
+        motionPath: { path: "#light-path", align: "#light-path", alignOrigin: [0.5, 0.5] },
+      }, 3.7)
+      .to("#co2", { autoAlpha: 1, scale: 1, duration: 0.4 }, 4.5)
+      .to("#h2o", { autoAlpha: 1, scale: 1, duration: 0.4 }, 4.7)
+      .to("#co2-path", { strokeDashoffset: 0, duration: 0.55 }, 5.0)
+      .to("#h2o-path", { strokeDashoffset: 0, duration: 0.55 }, 5.1)
+      .to("#co2-dot", { autoAlpha: 1, duration: 0.1 }, 5.0)
+      .to("#h2o-dot", { autoAlpha: 1, duration: 0.1 }, 5.1)
+      .to("#co2-dot", {
+        duration: 0.9,
+        ease: "none",
+        motionPath: { path: "#co2-path", align: "#co2-path", alignOrigin: [0.5, 0.5] },
+      }, 5.0)
+      .to("#h2o-dot", {
+        duration: 0.9,
+        ease: "none",
+        motionPath: { path: "#h2o-path", align: "#h2o-path", alignOrigin: [0.5, 0.5] },
+      }, 5.1)
+      .to("#out-path", { strokeDashoffset: 0, duration: 0.5 }, 6.0)
+      .to("#o2-path", { strokeDashoffset: 0, duration: 0.5 }, 6.1)
+      .to("#glucose", { autoAlpha: 1, scale: 1, duration: 0.45 }, 6.3)
+      .to("#oxygen", { autoAlpha: 1, scale: 1, duration: 0.45 }, 6.5)
+      .to("#caption-1", { autoAlpha: 1, duration: 0.5 }, 6.6)
+      .to(["#scene-plant", "#caption-1"], { autoAlpha: 0, duration: 0.45 }, 7.6);
+
+    tl.to("#equation", { autoAlpha: 1, duration: 0.2 }, 7.8)
+      .to("#eq-light", { autoAlpha: 1, y: 0, duration: 0.35 }, 7.9)
+      .to("#eq-plus1", { autoAlpha: 1, y: 0, duration: 0.25 }, 8.1)
+      .to("#eq-co2", { autoAlpha: 1, y: 0, duration: 0.35 }, 8.25)
+      .to("#eq-plus2", { autoAlpha: 1, y: 0, duration: 0.25 }, 8.4)
+      .to("#eq-h2o", { autoAlpha: 1, y: 0, duration: 0.35 }, 8.55)
+      .to("#eq-arrow", { autoAlpha: 1, y: 0, scale: 1.1, duration: 0.35 }, 8.8)
+      .to("#eq-sugar", { autoAlpha: 1, y: 0, duration: 0.4 }, 9.05)
+      .to("#eq-plus3", { autoAlpha: 1, y: 0, duration: 0.25 }, 9.25)
+      .to("#eq-o2", { autoAlpha: 1, y: 0, duration: 0.35 }, 9.4)
+      .to("#equation", { autoAlpha: 0, y: -20, duration: 0.4 }, 10.2);
+
+    tl.to("#close", { autoAlpha: 1, duration: 0.55 }, 10.3)
+      .from("#close", { y: 28, duration: 0.55 }, 10.3)
+      .to("#close-sub", { autoAlpha: 1, duration: 0.45 }, 10.8)
+      .to(["#close", "#close-sub"], { scale: 1.02, duration: 0.8, transformOrigin: "left center" }, 11.2);
+
+    window.__timelines = window.__timelines || {};
+    window.__timelines["clip"] = tl;
+  </script>
+  <script>
+    const tl = window.__timelines && window.__timelines["clip"];
+    if (tl) tl.play(0);
+  </script>
+</body>
+</html>

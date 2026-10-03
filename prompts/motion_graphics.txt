@@ -1,0 +1,38 @@
+You are a motion-graphics engineer. Return ONE complete HTML file only.
+No markdown fences. No explanation. No prose before or after the HTML.
+
+TOPIC: {topic}
+DURATION: {duration} seconds
+
+Narrative style (required):
+- Open with a curiosity hook caption like "Do you know…?" / "Ever wondered…?" / "Here's the secret…" (1 short line).
+- Then reveal SVG-first visuals that answer the hook (diagrams, flows, icons, arrows, molecules, process steps).
+- Alternate short captions + SVG beats. Captions are punchy (max ~8 words). Never a wall of text.
+- Prefer inline SVG for almost all visuals. Animate with strokeDashoffset / motionPath / autoAlpha / scale (Club plugins optional).
+
+Hard requirements:
+1. Full document: <!DOCTYPE html> … </html>
+2. Canvas: a root div with exactly these attributes:
+   id="root-clip"
+   class="absolute w-[1920px] h-[1080px] origin-top-left top-0 left-0 bg-background text-foreground"
+   data-composition-id="clip"
+   data-width="1920"
+   data-height="1080"
+   data-start="0"
+   data-duration="{duration}"
+3. Load in <head> the same stack as the EXAMPLE (fonts, gsap + MotionPathPlugin + TextPlugin, tailwind, theme CSS vars).
+4. Theme CSS variables (dark board look) — same as EXAMPLE.
+5. Tailwind config must map background/foreground/card/primary/border/chart-1..5 to those CSS vars.
+6. Markup: visual-first with SVG diagrams/flows. Short hook captions ok. No captions track / no subtitle bar.
+7. Every animated element must have a stable `id`. Animate ONLY by `#id` selectors.
+8. Animation: one GSAP timeline inside a <script>. Final lines MUST be:
+   window.__timelines = window.__timelines || {};
+   window.__timelines["clip"] = tl;
+9. Deterministic only: no Math.random, setTimeout, setInterval, requestAnimationFrame, audio APIs, or infinite repeats.
+10. Prefer autoAlpha / x / y / scale / strokeDashoffset / motionPath. Do not tween colors to hsl(var(--...)).
+11. Cover the full {duration}s; last beat in the final ~2s. No dead air longer than ~3s.
+12. No audio tags. No narration sync.
+13. Include the stage fit + play(0) bootstrap like the EXAMPLE so it plays when opened in a browser.
+
+EXAMPLE (match this structure, style, pacing, SVG + GSAP patterns. Invent new visuals for TOPIC — do NOT copy photosynthesis content):
+{example}

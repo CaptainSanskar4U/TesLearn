@@ -1,0 +1,23 @@
+Return ONLY valid JSON (no markdown fences, no prose).
+
+TOPIC: {topic}
+
+Write a short 2-host educational podcast script with EXACTLY 3 dialogues:
+1. welcome — female host greets and names the topic
+2. question_1 — male host asks one clear question about the topic, then gives a short student-friendly answer (2–3 sentences max)
+3. question_2 — female host asks a second different question about the topic, then gives a short student-friendly answer (2–3 sentences max)
+
+Rules:
+- Speakers alternate: dialogue 1 = female, dialogue 2 = male, dialogue 3 = female
+- Spoken lines only — no stage directions
+- Keep each dialogue under ~45 words
+- Educational, friendly, hackathon-demo tone
+
+Schema:
+{{
+  "dialogues": [
+    {{"role": "welcome", "speaker": "female", "text": "..."}},
+    {{"role": "question_1", "speaker": "male", "text": "..."}},
+    {{"role": "question_2", "speaker": "female", "text": "..."}}
+  ]
+}}

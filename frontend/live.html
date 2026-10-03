@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#3b82f6" />
+  <title>Live Session — TesLearn</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <div class="mesh-bg" aria-hidden="true"></div>
+
+  <div class="shell shell-narrow content">
+    <div id="nav"></div>
+
+    <header class="page-head">
+      <p class="kicker" id="kicker">Live</p>
+      <h1 class="title-lg" id="title">Topic</h1>
+      <p class="muted" id="modeHint">Voice session via Gemini Live API</p>
+    </header>
+
+    <div class="live-stage card" id="liveStage">
+      <button type="button" class="embed-fs-btn" id="liveFsBtn" aria-label="Enter fullscreen">⛶ Fullscreen</button>
+
+      <div class="live-viva" id="vivaPanel">
+        <span class="status-pill" id="status">Starting…</span>
+
+        <div class="live-subtitle-box" id="sub">
+          <p class="muted">Examiner questions and AI replies appear here.</p>
+        </div>
+
+        <div class="viz" id="viz" aria-hidden="true">
+          <span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span>
+          <span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span>
+          <span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span>
+          <span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span>
+        </div>
+
+        <p id="err" class="alert hidden"></p>
+        <p class="muted hint live-hint" id="hint">Starting session on the server…</p>
+      </div>
+
+      <div class="live-screen hidden" id="screenPanel">
+        <span class="status-pill" id="statusScreen">Starting…</span>
+        <video id="cam" class="live-preview hidden" autoplay playsinline muted></video>
+        <div class="live-subtitle-box" id="subScreen">
+          <p class="muted">AI responses appear here as text subtitles.</p>
+        </div>
+        <div class="viz" id="vizScreen" aria-hidden="true">
+          <span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span>
+          <span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span>
+        </div>
+        <p id="errScreen" class="alert hidden"></p>
+        <p class="muted hint live-hint" id="hintScreen">Starting session on the server…</p>
+      </div>
+
+      <button type="button" class="btn btn-ghost live-action-btn hidden" id="sessionBtn">Reconnect</button>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/live.js"></script>
+  <script>
+    UI.mountNav({ backHref: 'resources.html' });
+    const mode = new URLSearchParams(location.search).get('mode') || 'viva';
+    document.getElementById('modeHint').textContent =
+      mode === 'screen'
+        ? 'Opens a live session — talk naturally, the AI sees your screen and replies'
+        : 'Opens a live viva — talk naturally, the examiner listens and replies';
+  </script>
+</body>
+</html>

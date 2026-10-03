@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtual Lab 3D — Photosynthesis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            board: "#121826",
+            panel: "#1c2433",
+            card: "#2a3040",
+            border: "#3d4354",
+            muted: "#9aa3b5",
+            accent: "#e05d38",
+            sky: "#86a7c8",
+            water: "#4a90c8",
+            leaf: "#5a9e6f",
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"],
+            mono: ['"JetBrains Mono"', "monospace"],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    input[type="range"] { accent-color: #e05d38; }
+    #viewport { width: 100%; height: min(62vh, 520px); }
+    #viewport canvas { display: block; width: 100% !important; height: 100% !important; }
+  </style>
+</head>
+<body class="min-h-screen bg-board font-sans text-neutral-100 antialiased">
+  <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <header class="mb-5">
+      <h1 class="text-3xl font-extrabold tracking-tight">Photosynthesis Lab (3D)</h1>
+      <p class="mt-1 text-muted">Two knobs only: light and water. Hit Run for chaos.</p>
+    </header>
+
+    <div id="banner" class="mb-4 rounded-xl border border-border bg-panel px-4 py-3" role="status" aria-live="polite">
+      <p id="bannerTitle" class="font-bold">Ready</p>
+      <p id="bannerBody" class="text-sm text-muted">Move the sliders, then press Run.</p>
+    </div>
+
+    <div class="grid gap-5 lg:grid-cols-[300px_1fr]">
+      <aside class="order-2 space-y-5 rounded-2xl border border-border bg-panel p-5 lg:order-1">
+        <div>
+          <div class="mb-2 flex justify-between text-sm font-semibold">
+            <label for="sunlight">☀ Light</label>
+            <span id="sunVal" class="font-mono text-accent">70%</span>
+          </div>
+          <input id="sunlight" type="range" min="0" max="100" value="70" class="w-full" />
+        </div>
+        <div>
+          <div class="mb-2 flex justify-between text-sm font-semibold">
+            <label for="h2oIn">💧 Water</label>
+            <span id="h2oVal" class="font-mono text-water">50%</span>
+          </div>
+          <input id="h2oIn" type="range" min="0" max="100" value="50" class="w-full" />
+        </div>
+        <div class="rounded-xl border border-border bg-card p-3">
+          <div class="mb-1.5 flex justify-between text-sm">
+            <span>Food made (glucose)</span>
+            <span id="outPct" class="font-mono text-accent">0%</span>
+          </div>
+          <div class="h-2.5 overflow-hidden rounded-full bg-board">
+            <div id="outBar" class="h-full rounded-full bg-accent transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button id="runBtn" type="button" class="flex-1 rounded-xl bg-accent py-3 text-sm font-extrabold text-white hover:brightness-110">Run</button>
+          <button id="resetBtn" type="button" class="rounded-xl border border-border bg-card px-4 py-3 text-sm font-bold hover:bg-border/40">Reset</button>
+        </div>
+        <p id="tip" class="rounded-xl border border-dashed border-border bg-board px-3 py-3 text-sm text-muted">
+          Tip: set light high and water low — the smaller one limits the plant.
+        </p>
+      </aside>
+
+      <section class="order-1 overflow-hidden rounded-2xl border border-border bg-panel lg:order-2">
+        <div class="relative">
+          <div id="viewport" class="bg-[#152033]"></div>
+          <div class="absolute bottom-4 left-4 right-4 rounded-xl border border-border/80 bg-panel/95 px-4 py-3">
+            <p id="callout" class="text-sm font-bold">Waiting for Run…</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const sunlight = $("sunlight");
+    const h2oIn = $("h2oIn");
+    const CO2 = 70;
+
+    const mount = $("viewport");
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x152033, 0.045);
+
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    const camHome = new THREE.Vector3(3.6, 2.4, 5.4);
+    camera.position.copy(camHome);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    mount.appendChild(renderer.domElement);
+
+    scene.add(new THREE.HemisphereLight(0xc5d4f0, 0x1e2a22, 0.9));
+    const sunLight = new THREE.DirectionalLight(0xffc4a8, 1.3);
+    sunLight.position.set(-3, 5, 2);
+    scene.add(sunLight);
+    const pointGlow = new THREE.PointLight(0xe05d38, 0.8, 12);
+    pointGlow.position.set(-2.2, 2.8, -0.4);
+    scene.add(pointGlow);
+
+    const ground = new THREE.Mesh(
+      new THREE.CircleGeometry(3.6, 64),
+      new THREE.MeshStandardMaterial({ color: 0x1e2a22, roughness: 1 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+
+    // orbit rings
+    const rings = [];
+    [1.4, 2.1, 2.9].forEach((r, i) => {
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(r, 0.015, 8, 80),
+        new THREE.MeshBasicMaterial({ color: i === 1 ? 0xe05d38 : 0x86a7c8, transparent: true, opacity: 0.25 })
+      );
+      ring.rotation.x = Math.PI / 2.4 + i * 0.15;
+      scene.add(ring);
+      rings.push(ring);
+    });
+
+    const pot = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.45, 0.58, 0.55, 28),
+      new THREE.MeshStandardMaterial({ color: 0x6b4f3a, roughness: 0.85 })
+    );
+    pot.position.y = 0.28;
+    scene.add(pot);
+
+    const plant = new THREE.Group();
+    scene.add(plant);
+
+    const stem = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.06, 0.09, 1.45, 14),
+      new THREE.MeshStandardMaterial({ color: 0x3f7a52 })
+    );
+    stem.position.y = 1.15;
+    plant.add(stem);
+
+    function makeLeaf(x, y, z, rotZ, color) {
+      const leaf = new THREE.Mesh(
+        new THREE.SphereGeometry(0.42, 18, 14),
+        new THREE.MeshStandardMaterial({ color, roughness: 0.45, emissive: color, emissiveIntensity: 0.05 })
+      );
+      leaf.scale.set(1.45, 0.26, 0.85);
+      leaf.position.set(x, y, z);
+      leaf.rotation.z = rotZ;
+      leaf.userData = { base: { x, y, z, rotZ } };
+      plant.add(leaf);
+      return leaf;
+    }
+    const leaves = [
+      makeLeaf(-0.55, 1.35, 0.1, 0.5, 0x5a9e6f),
+      makeLeaf(0.6, 1.5, -0.05, -0.45, 0x6db07f),
+      makeLeaf(0.05, 1.95, 0.15, 0.1, 0x7ec28f),
+      makeLeaf(-0.25, 1.7, -0.35, 0.3, 0x4f8f62),
+    ];
+
+    // sun + spinning rays
+    const sunGroup = new THREE.Group();
+    sunGroup.position.set(-2.5, 2.7, -0.7);
+    scene.add(sunGroup);
+    const sun = new THREE.Mesh(
+      new THREE.SphereGeometry(0.42, 28, 28),
+      new THREE.MeshBasicMaterial({ color: 0xe05d38 })
+    );
+    sunGroup.add(sun);
+    const sunCore = new THREE.Mesh(
+      new THREE.SphereGeometry(0.22, 16, 16),
+      new THREE.MeshBasicMaterial({ color: 0xffe0a8 })
+    );
+    sunGroup.add(sunCore);
+    const rays = [];
+    for (let i = 0; i < 10; i++) {
+      const ray = new THREE.Mesh(
+        new THREE.ConeGeometry(0.06, 0.55, 6),
+        new THREE.MeshBasicMaterial({ color: 0xe8a090, transparent: true, opacity: 0.85 })
+      );
+      const a = (i / 10) * Math.PI * 2;
+      ray.position.set(Math.cos(a) * 0.72, Math.sin(a) * 0.72, 0);
+      ray.rotation.z = a - Math.PI / 2;
+      sunGroup.add(ray);
+      rays.push(ray);
+    }
+
+    // water orb that orbits
+    const droplet = new THREE.Mesh(
+      new THREE.SphereGeometry(0.26, 18, 18),
+      new THREE.MeshStandardMaterial({ color: 0x4a90c8, transparent: true, opacity: 0.85, metalness: 0.3, roughness: 0.1 })
+    );
+    scene.add(droplet);
+
+    // glucose + twin sparkles
+    const glucose = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.38, 0),
+      new THREE.MeshStandardMaterial({
+        color: 0xe05d38,
+        emissive: 0xe05d38,
+        emissiveIntensity: 0.2,
+        transparent: true,
+        opacity: 0.35,
+        metalness: 0.4,
+        roughness: 0.25,
+      })
+    );
+    glucose.position.set(-1.75, 0.6, 1.25);
+    scene.add(glucose);
+
+    const beam = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.035, 0.08, 3.4, 10),
+      new THREE.MeshBasicMaterial({ color: 0xe8a090, transparent: true, opacity: 0.4 })
+    );
+    beam.position.set(-1.15, 1.95, -0.25);
+    beam.rotation.z = Math.PI / 3.1;
+    scene.add(beam);
+
+    // ambient floaters
+    const floaters = [];
+    for (let i = 0; i < 28; i++) {
+      const m = new THREE.Mesh(
+        new THREE.SphereGeometry(0.04 + Math.random() * 0.05, 8, 8),
+        new THREE.MeshBasicMaterial({
+          color: Math.random() > 0.5 ? 0xe05d38 : 0x86a7c8,
+          transparent: true,
+          opacity: 0.35 + Math.random() * 0.4,
+        })
+      );
+      m.position.set((Math.random() - 0.5) * 6, 0.4 + Math.random() * 3.2, (Math.random() - 0.5) * 6);
+      m.userData = {
+        speed: 0.004 + Math.random() * 0.01,
+        phase: Math.random() * Math.PI * 2,
+        radius: 0.3 + Math.random() * 0.8,
+      };
+      scene.add(m);
+      floaters.push(m);
+    }
+
+    let particles = [];
+    let shockwaves = [];
+    let shake = 0;
+    let boom = 0;
+    let energy = 0.35;
+
+    function spawnBurst(strength) {
+      if (strength < 0.05) return;
+      const n = Math.floor(24 + strength * 60);
+      for (let i = 0; i < n; i++) {
+        const mesh = new THREE.Mesh(
+          new THREE.SphereGeometry(0.04 + Math.random() * 0.07, 8, 8),
+          new THREE.MeshBasicMaterial({
+            color: [0xe05d38, 0x4a90c8, 0x7ec28f, 0xffe0a8][i % 4],
+            transparent: true,
+            opacity: 1,
+          })
+        );
+        mesh.position.set(0, 1.5, 0);
+        const dir = new THREE.Vector3(Math.random() - 0.5, Math.random() * 0.9, Math.random() - 0.5).normalize();
+        scene.add(mesh);
+        particles.push({
+          mesh,
+          v: dir.multiplyScalar(0.04 + Math.random() * 0.12 * strength),
+          life: 1,
+          spin: (Math.random() - 0.5) * 0.4,
+        });
+      }
+      // shockwave rings
+      for (let i = 0; i < 3; i++) {
+        const wave = new THREE.Mesh(
+          new THREE.TorusGeometry(0.2, 0.03, 8, 48),
+          new THREE.MeshBasicMaterial({ color: i % 2 ? 0xe05d38 : 0x86a7c8, transparent: true, opacity: 0.9 })
+        );
+        wave.position.set(0, 1.2, 0);
+        wave.rotation.x = Math.PI / 2;
+        scene.add(wave);
+        shockwaves.push({ mesh: wave, life: 1, grow: 0.08 + i * 0.03 });
+      }
+      shake = 0.35 + strength * 0.55;
+      boom = 1;
+    }
+
+    function resize() {
+      const w = mount.clientWidth;
+      const h = mount.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h, false);
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    let t = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      t += 0.016;
+      energy += ((Number(sunlight.value) / 100) * 0.7 + 0.3 - energy) * 0.05;
+
+      // wild camera orbit + punch
+      const orbit = 0.35 + energy * 0.45;
+      camera.position.x = camHome.x * Math.cos(t * 0.22 * orbit) + Math.sin(t * 0.15) * 0.4;
+      camera.position.z = camHome.z * Math.sin(t * 0.22 * orbit + 1.2) + 2.2;
+      camera.position.y = camHome.y + Math.sin(t * 0.5) * 0.25 + boom * 0.35;
+      if (shake > 0) {
+        camera.position.x += (Math.random() - 0.5) * shake;
+        camera.position.y += (Math.random() - 0.5) * shake;
+        shake *= 0.9;
+      }
+      boom *= 0.92;
+      camera.lookAt(0, 0.9 + Math.sin(t * 2) * 0.05, 0);
+
+      // sun mania
+      sunGroup.rotation.z += 0.04 + energy * 0.06;
+      sunGroup.rotation.y += 0.02;
+      sun.scale.setScalar(0.9 + Math.sin(t * 6) * 0.12 * energy);
+      sunCore.scale.setScalar(0.85 + Math.abs(Math.sin(t * 8)) * 0.35);
+      pointGlow.intensity = 0.5 + energy * 1.8 + Math.sin(t * 10) * 0.3;
+      rays.forEach((ray, i) => {
+        ray.scale.y = 0.8 + Math.sin(t * 8 + i) * 0.55 * energy;
+      });
+
+      // plant dance
+      plant.rotation.y = Math.sin(t * 1.4) * 0.18 * energy;
+      plant.position.y = Math.abs(Math.sin(t * 3)) * 0.05 * energy;
+      leaves.forEach((leaf, i) => {
+        const b = leaf.userData.base;
+        leaf.rotation.z = b.rotZ + Math.sin(t * 4 + i) * 0.55 * energy;
+        leaf.rotation.x = Math.cos(t * 3.2 + i * 1.3) * 0.35 * energy;
+        leaf.position.y = b.y + Math.sin(t * 5 + i) * 0.08 * energy;
+        leaf.material.emissiveIntensity = 0.05 + energy * 0.35 + Math.sin(t * 7 + i) * 0.1;
+      });
+
+      // water orbit + stretch
+      const w = Number(h2oIn.value) / 100;
+      droplet.position.set(Math.cos(t * 1.8) * (1.8 + w), 1.1 + Math.sin(t * 3.5) * 0.35, Math.sin(t * 1.8) * (1.5 + w * 0.4));
+      droplet.scale.set(1 + Math.sin(t * 5) * 0.25, 1.3 + Math.cos(t * 4) * 0.35, 1 + Math.sin(t * 6) * 0.2);
+
+      // glucose hyper spin
+      glucose.rotation.x += 0.03 + boom * 0.1;
+      glucose.rotation.y += 0.05 + energy * 0.08;
+      glucose.rotation.z += 0.02;
+      glucose.position.y = 0.6 + Math.abs(Math.sin(t * 4)) * 0.25 + boom * 0.4;
+
+      beam.material.opacity = 0.15 + energy * 0.5 + Math.sin(t * 9) * 0.1;
+      beam.scale.x = 1 + Math.sin(t * 12) * 0.5 * energy;
+
+      rings.forEach((ring, i) => {
+        ring.rotation.z += 0.01 + i * 0.005;
+        ring.rotation.y += 0.008;
+        ring.material.opacity = 0.15 + energy * 0.35 + Math.sin(t * 3 + i) * 0.1;
+      });
+
+      floaters.forEach((f, i) => {
+        f.position.y += Math.sin(t * 2 + f.userData.phase) * 0.004;
+        f.position.x += Math.cos(t * f.userData.speed * 40 + i) * 0.006;
+        f.material.opacity = 0.2 + Math.abs(Math.sin(t * 3 + i)) * 0.5 * energy;
+      });
+
+      particles.forEach((p) => {
+        p.life -= 0.014;
+        p.v.y -= 0.0015;
+        p.mesh.position.add(p.v);
+        p.mesh.rotation.x += p.spin;
+        p.mesh.rotation.y += p.spin;
+        p.mesh.material.opacity = Math.max(0, p.life);
+        p.mesh.scale.setScalar(0.6 + p.life);
+      });
+      particles = particles.filter((p) => {
+        if (p.life <= 0) {
+          scene.remove(p.mesh);
+          return false;
+        }
+        return true;
+      });
+
+      shockwaves.forEach((s) => {
+        s.life -= 0.02;
+        s.mesh.scale.x += s.grow;
+        s.mesh.scale.y += s.grow;
+        s.mesh.material.opacity = Math.max(0, s.life);
+      });
+      shockwaves = shockwaves.filter((s) => {
+        if (s.life <= 0) {
+          scene.remove(s.mesh);
+          return false;
+        }
+        return true;
+      });
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    function rate() {
+      return Math.min(Number(sunlight.value), Number(h2oIn.value), CO2) / 100;
+    }
+    function limiter() {
+      const s = Number(sunlight.value);
+      const w = Number(h2oIn.value);
+      if (s <= w && s <= CO2) return "light";
+      if (w <= s && w <= CO2) return "water";
+      return "CO₂ (fixed air)";
+    }
+
+    function sync() {
+      const s = Number(sunlight.value) / 100;
+      const w = Number(h2oIn.value) / 100;
+      const r = rate();
+      $("sunVal").textContent = sunlight.value + "%";
+      $("h2oVal").textContent = h2oIn.value + "%";
+      sunLight.intensity = 0.4 + s * 2.2;
+      sunGroup.scale.setScalar(0.75 + s * 0.7);
+      droplet.material.opacity = 0.3 + w * 0.7;
+      leaves.forEach((leaf) => leaf.material.color.setHSL(0.33, 0.35 + r * 0.5, 0.35 + r * 0.18));
+    }
+
+    function run() {
+      const r = rate();
+      const pct = Math.round(r * 100);
+      const lim = limiter();
+      $("outBar").style.width = pct + "%";
+      $("outPct").textContent = pct + "%";
+      glucose.material.opacity = 0.3 + r * 0.7;
+      glucose.material.emissiveIntensity = 0.2 + r * 1.2;
+      glucose.scale.setScalar(0.85 + r * 0.9);
+      spawnBurst(r);
+
+      const banner = $("banner");
+      if (pct < 15) {
+        banner.className = "mb-4 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3";
+        $("bannerTitle").textContent = "Almost nothing made";
+        $("bannerBody").textContent = "Raise " + lim + " — it’s too low.";
+        $("callout").textContent = "Plant stalled. Limited by " + lim + ".";
+        $("tip").textContent = "Fix: increase " + lim + ", then Run again.";
+      } else if (pct < 55) {
+        banner.className = "mb-4 rounded-xl border border-accent/40 bg-accent/10 px-4 py-3";
+        $("bannerTitle").textContent = "Some food made (" + pct + "%)";
+        $("bannerBody").textContent = "Limited by " + lim + ". Boost that for a bigger burst.";
+        $("callout").textContent = "Working, but " + lim + " is holding it back.";
+        $("tip").textContent = "Try raising " + lim + " and keep the other slider the same.";
+      } else {
+        banner.className = "mb-4 rounded-xl border border-leaf/40 bg-leaf/10 px-4 py-3";
+        $("bannerTitle").textContent = "Strong photosynthesis (" + pct + "%)";
+        $("bannerBody").textContent = "Full send — shockwaves, sparks, glowing glucose.";
+        $("callout").textContent = "Healthy plant — energy storm!";
+        $("tip").textContent = "Now drop one slider low to see the limiting-factor rule.";
+      }
+    }
+
+    function reset() {
+      sunlight.value = 70;
+      h2oIn.value = 50;
+      $("outBar").style.width = "0%";
+      $("outPct").textContent = "0%";
+      glucose.material.opacity = 0.35;
+      glucose.material.emissiveIntensity = 0.2;
+      glucose.scale.setScalar(1);
+      $("banner").className = "mb-4 rounded-xl border border-border bg-panel px-4 py-3";
+      $("bannerTitle").textContent = "Ready";
+      $("bannerBody").textContent = "Move the sliders, then press Run.";
+      $("callout").textContent = "Waiting for Run…";
+      $("tip").textContent = "Tip: set light high and water low — the smaller one limits the plant.";
+      sync();
+    }
+
+    [sunlight, h2oIn].forEach((el) => el.addEventListener("input", sync));
+    $("runBtn").addEventListener("click", run);
+    $("resetBtn").addEventListener("click", reset);
+    sync();
+  </script>
+</body>
+</html>

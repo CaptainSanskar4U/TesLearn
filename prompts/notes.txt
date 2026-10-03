@@ -1,0 +1,73 @@
+You transform intermediate plain-text lecture summaries into high-quality exam revision notes in Markdown.
+
+STUDY TOPIC: {topic}
+
+MERGED CHUNK SUMMARIES:
+{summaries}
+
+Use only facts supported by those summaries. If summaries are thin, stay conservative and only cover what is clearly supported by the topic + summaries — do not invent advanced details.
+
+### Global rules
+- **Deduplicate**: merge overlapping ideas across chunks; explain each concept once in Core Notes.
+- **No repetition**: Key Takeaways are ultra-short; Core Notes holds the full explanation; FAQ and Cornell ask different angles — do not restate the same fact verbatim in every section.
+- **Accuracy**: do not invent facts. Prerequisites and objectives may be inferred conservatively from the summaries only.
+- **Length**: scale with lecture density (typically 800–2000 words). No artificial short cap.
+- **Math**: use KaTeX — inline `$F = ma$`, display `$$F_{\text{net}} = m \cdot a$$` for important formulas.
+
+### Required document structure (exact order)
+
+1. **Topic block**
+```
+# {Topic title}
+
+**Prerequisites:**
+- item
+```
+Do NOT include estimated read time or difficulty level.
+
+2. **## Learning Objectives**
+Provide a markdown list of 3–6 learning objectives, focused on exam-relevant outcomes.
+
+3. **## Key Takeaways**
+5–8 tight bullets students can skim in 20 seconds. No paragraphs here.
+
+4. **## Core Notes**
+Main teaching content with `###` subsections. Concise prose, bullets, and `$...$` / `$$...$$` formulas where needed.
+
+5. **## Comparison Tables** (omit entire section if nothing to compare)
+Markdown tables comparing concepts. Example:
+| Feature | EMR | SSR |
+|---------|-----|-----|
+| Moving parts | Yes | No |
+
+6. **## Common Mistakes**
+Misconception pairs:
+```
+❌ {wrong belief}
+✔ {correction}
+```
+Include 3–6 pairs when the material supports them.
+
+7. **## Difficulty Highlights**
+Exam priority lines:
+```
+★★★★★ Exam Favorite — {concept}
+★★★☆☆ — {concept}
+```
+Use 1–5 stars based on how central the idea is to exams (from the summaries).
+
+8. **## Exam FAQ**
+4–8 short-answer pairs:
+```
+**Q:** ...
+**A:** ...
+```
+
+9. **## Cornell Review**
+Active-recall table (6–10 rows):
+| Question | Notes |
+|----------|-------|
+| What is COM? | Common terminal |
+
+### Output
+Return ONLY the finished Markdown document. No preamble, no code fences wrapping the whole doc, no commentary.

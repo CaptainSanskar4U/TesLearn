@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#3b82f6" />
+  <title>AI Chat — TesLearn</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script src="js/markdown.js"></script>
+</head>
+<body>
+  <div class="mesh-bg" aria-hidden="true"></div>
+
+  <div class="shell content">
+    <div id="nav"></div>
+
+    <header class="page-head" style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
+      <div>
+        <p class="kicker">AI Chat</p>
+        <h1 class="title-lg" id="title" style="margin-top:0.35rem">Topic</h1>
+        <p class="muted">Ask follow-up questions about your lesson</p>
+      </div>
+      <button type="button" class="btn btn-ghost" id="clear" style="flex-shrink:0">Clear</button>
+    </header>
+
+    <div class="card chat-layout">
+      <div class="chat-messages" id="messages" aria-live="polite"></div>
+      <form class="chat-input-bar" onsubmit="return false">
+        <textarea id="input" class="input-field" rows="1" placeholder="Ask a question…" aria-label="Message"></textarea>
+        <button type="button" class="btn btn-primary" id="send">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/chat-page.js"></script>
+  <script>UI.mountNav({ backHref: 'resources.html' });</script>
+</body>
+</html>

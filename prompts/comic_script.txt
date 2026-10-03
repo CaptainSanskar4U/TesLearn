@@ -1,0 +1,49 @@
+Return ONLY valid JSON (no markdown fences, no prose).
+
+CONCEPT: {topic}
+
+Write a 2-page educational comic book script for this concept.
+
+Constraints:
+- Exactly 2 pages
+- Exactly 1 panel per page (2 panels total)
+- Kid/teen friendly, clear visual storytelling
+- Each panel needs: scene action, short caption OR speech bubble text (not both long), and a visual focus
+- Keep speech/caption under 12 words
+- Characters should stay consistent (name them once, reuse)
+- Teach the concept — not just decorate it
+
+Schema:
+{{
+  "title": "short comic title",
+  "characters": [
+    {{"name": "Maya", "look": "teen girl, blue hoodie, curious expression"}},
+    {{"name": "Coach Ray", "look": "friendly teacher, glasses, green sweater"}}
+  ],
+  "pages": [
+    {{
+      "page": 1,
+      "panels": [
+        {{
+          "panel": 1,
+          "scene": "what happens visually",
+          "caption": "optional narrator line or empty string",
+          "dialogue": "Speaker: short line or empty string",
+          "focus": "main visual object/action"
+        }}
+      ]
+    }},
+    {{
+      "page": 2,
+      "panels": [
+        {{
+          "panel": 1,
+          "scene": "...",
+          "caption": "...",
+          "dialogue": "...",
+          "focus": "..."
+        }}
+      ]
+    }}
+  ]
+}}

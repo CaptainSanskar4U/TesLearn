@@ -1,0 +1,22 @@
+Return ONE complete HTML file only.
+No markdown fences. No explanation. No prose before or after the HTML.
+
+TOPIC: {topic}
+
+Build an interactive educational Virtual Lab for this topic (2D SVG — no Three.js).
+
+Hard requirements:
+1. Full document: <!DOCTYPE html> … </html>
+2. Use Tailwind via https://cdn.tailwindcss.com (same dark theme tokens as EXAMPLE: board, panel, card, border, muted, accent, sky, water, leaf)
+3. Google fonts: Plus Jakarta Sans + JetBrains Mono
+4. Layout: controls on the LEFT, SVG visuals on the RIGHT (stack on mobile)
+5. Only 1–2 interactive parameters (sliders). Keep it extremely simple.
+6. Clear visible feedback after Run: status banner (ok / warn / bad) + one tip line + one output meter
+7. SVG diagram that reacts to inputs (opacity / saturate / simple particle motion is fine)
+8. Must work when opened directly in a browser (no build step)
+9. Educational: teach one core idea of the TOPIC (e.g. limiting factors, cause→effect)
+10. No Three.js. No WebGL. No 3D. SVG + HTML/CSS/JS only.
+11. No external APIs. No login. Self-contained HTML/CSS/JS only.
+
+EXAMPLE (match structure, Tailwind theme, left controls / right SVG, 2 knobs max, feedback style — invent a NEW 2D lab for TOPIC, do not copy photosynthesis content):
+{example}

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#3b82f6" />
+  <title>History — TesLearn</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <div class="mesh-bg" aria-hidden="true"></div>
+  <div class="shell content">
+    <div id="nav"></div>
+
+    <header class="page-head">
+      <p class="kicker">History</p>
+      <h1 class="title-lg" style="margin-top:0.35rem">Saved resources</h1>
+      <p class="muted">Open anything generated on this server.</p>
+    </header>
+
+    <div id="status" class="history-status muted">Loading…</div>
+    <div class="history-grid" id="list"></div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/history.js"></script>
+  <script>
+    UI.mountNav({ backHref: 'index.html', showHistory: false });
+
+    const listEl = document.getElementById('list');
+    const statusEl = document.getElementById('status');
+
+    function openItem(item) {
+      Store.topic = item.topic;
+      Store.result = item.result;
+      location.href = 'result.html';
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function render(items) {
+      if (!items.length) {
+        statusEl.textContent = '';
+        listEl.innerHTML = '<p class="history-empty card">No saved resources yet. Generate something first.</p>';
+        return;
+      }
+      statusEl.innerHTML = `<span class="status-pill">${items.length} saved item${items.length === 1 ? '' : 's'}</span>`;
+      listEl.innerHTML = items.map((item) => {
+        const meta = TYPE_META[item.type];
+        return `
+          <a href="#" class="tile card history-card" data-id="${item.type}-${item.id}">
+            <div class="tile-icon image">
+              <img src="${meta.icon}" alt="${meta.label}" width="52" height="52" loading="lazy" />
+            </div>
+            <h3>${escapeHtml(item.topic)}</h3>
+            <p>${meta.label} · ${meta.sub}</p>
+            <span class="history-open" aria-hidden="true">Open →</span>
+          </a>`;
+      }).join('');
+
+      listEl.querySelectorAll('.history-card').forEach((el, i) => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          openItem(items[i]);
+        });
+      });
+    }
+
+    (async () => {
+      try {
+        const items = await loadHistory();
+        render(items);
+      } catch (e) {
+        statusEl.textContent = '';
+        listEl.innerHTML = `<p class="alert card">${e.message || String(e)}</p>`;
+      }
+    })();
+  </script>
+</body>
+</html>

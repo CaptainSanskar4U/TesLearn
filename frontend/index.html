@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#3b82f6" />
+  <title>TesLearn — Learn Anything</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <div class="mesh-bg" aria-hidden="true"></div>
+  <div class="float-bg" aria-hidden="true">
+    <span style="top:8%;left:6%">H₂O</span>
+    <span style="top:18%;right:12%">F = ma</span>
+    <span style="bottom:22%;left:10%">PV = nRT</span>
+    <span style="top:42%;right:8%">∫ f(x) dx</span>
+    <span style="bottom:12%;right:18%">NaCl</span>
+    <span style="top:55%;left:22%">{ }</span>
+  </div>
+
+  <div class="shell content">
+    <div id="nav"></div>
+
+    <div class="hero-grid">
+      <section>
+        <p class="kicker">Welcome back</p>
+        <h1 class="title-xl" style="margin-top:0.5rem">
+          Don't just learn<br />
+          <span style="color:var(--primary)">Experience.</span>
+        </h1>
+        <p class="muted" style="margin-top:1rem;max-width:32rem;line-height:1.65;font-size:1.05rem">
+          Turn any topic into an AI-powered learning experience — video, labs, mindmaps, notes, and live viva, generated just for you.
+        </p>
+        <div style="margin-top:2rem;display:flex;flex-wrap:wrap;gap:0.5rem">
+          <span class="status-pill">Video</span>
+          <span class="status-pill">Virtual Labs</span>
+          <span class="status-pill">Mindmaps</span>
+          <span class="status-pill">Notes</span>
+          <span class="status-pill">Live Viva</span>
+        </div>
+      </section>
+
+      <section class="card" style="padding:1.5rem">
+        <p class="kicker">Start learning</p>
+        <h2 class="title-lg" style="margin:0.35rem 0 1rem">What do you want to experience?</h2>
+        <label for="topic" class="muted" style="font-size:0.8125rem;display:block;margin-bottom:0.5rem">Topic or question</label>
+        <textarea id="topic" class="input-field" rows="4" placeholder="Explain projectile motion with real-world examples…"></textarea>
+        <button type="button" class="btn btn-primary" id="go" style="width:100%;margin-top:1.25rem">
+          ✦ Generate Resources
+        </button>
+        <p class="kicker" style="text-align:center;margin-top:1rem;margin-bottom:0">Powered by AI</p>
+      </section>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/store.js"></script>
+  <script>
+    UI.mountNav();
+    document.getElementById('go').onclick = () => {
+      const topic = document.getElementById('topic').value.trim();
+      if (!topic) { UI.toast('Please enter a topic first.'); return; }
+      Store.topic = topic;
+      location.href = 'resources.html';
+    };
+    document.getElementById('topic').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('go').click();
+      }
+    });
+  </script>
+</body>
+</html>

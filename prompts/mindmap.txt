@@ -1,0 +1,50 @@
+Return ONLY markmap-compatible Markdown. No HTML. No markdown fences. No prose before or after.
+
+TOPIC: {topic}
+
+Rules:
+- Start with YAML frontmatter:
+  ---
+  title: {topic}
+  markmap:
+    colorFreezeLevel: 2
+  ---
+- Root heading = the topic
+- 4–7 top-level branches (##)
+- Each branch has 2–5 bullet children; nest one more level where useful
+- Short labels (2–6 words). Prefer bullets over paragraphs.
+- Educational / exam-friendly structure for the topic
+- You may use **bold**, *italic*, `code`, and simple KaTeX ($...$) sparingly
+- No images, no tables, no code blocks
+
+EXAMPLE shape (invent new content for TOPIC — do not copy this topic):
+---
+title: Photosynthesis
+markmap:
+  colorFreezeLevel: 2
+---
+
+## Photosynthesis
+
+### What it is
+- Plants make food from light
+- Happens mainly in leaves
+- Chloroplasts do the work
+
+### Inputs
+- Sunlight
+- Carbon dioxide (CO₂)
+- Water (H₂O)
+
+### Outputs
+- Glucose (sugar)
+- Oxygen (O₂)
+
+### Equation
+- $6CO_2 + 6H_2O \rightarrow C_6H_12O_6 + 6O_2$
+- Light energy drives the reaction
+
+### Why it matters
+- Food for the plant
+- Oxygen for animals
+- Base of most food chains

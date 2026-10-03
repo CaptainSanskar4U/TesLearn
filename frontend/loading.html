@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#3b82f6" />
+  <title>Generating — TesLearn</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <link rel="stylesheet" href="css/app.css" />
+  <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+</head>
+<body class="loading-page">
+  <div class="mesh-bg" aria-hidden="true"></div>
+
+  <div class="shell shell-narrow content">
+    <div id="nav"></div>
+
+    <div class="loading-card card">
+      <div class="lottie-wrap" id="lottieWrap">
+        <dotlottie-player
+          id="lottie"
+          src="https://lottie.host/f5c8c91f-a220-4aa0-b813-3629e05de7d6/Mp6iJoLHIN.lottie"
+          background="transparent"
+          speed="1"
+          loop
+          autoplay
+        ></dotlottie-player>
+      </div>
+
+      <p class="kicker">Generating</p>
+      <h1 class="title-lg" id="msg">Preparing…</h1>
+      <p class="muted" id="topic"></p>
+
+      <div class="eta-wrap" id="etaWrap">
+        <p class="eta" id="eta"></p>
+        <div class="eta-bar" aria-hidden="true"><div class="eta-bar-fill" id="etaFill"></div></div>
+      </div>
+
+      <ul class="load-steps" id="steps">
+        <li class="active" data-step="guard">Checking content safety</li>
+        <li data-step="api">Calling AI backend</li>
+        <li data-step="done">Opening your resource</li>
+      </ul>
+
+      <p id="err" class="alert hidden"></p>
+      <a href="resources.html" id="back" class="btn btn-ghost hidden">← Back to resources</a>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/eta.js"></script>
+  <script>
+    UI.mountNav({ backHref: 'resources.html' });
+
+    const params = new URLSearchParams(location.search);
+    const kind = params.get('kind');
+    const topic = Store.topic;
+    const labels = {
+      video: 'Crafting your video lesson…',
+      podcast: 'Recording your podcast…',
+      mindmap: 'Building your mindmap…',
+      notes: 'Writing study notes…',
+      lab: 'Setting up your virtual lab…',
+      comic: 'Illustrating your comic…',
+      viva: 'Starting live viva session…',
+      screenReader: 'Starting screen reader…',
+      chat: 'Opening AI chat…',
+    };
+
+    if (!kind || !topic) location.href = 'index.html';
+
+    Store.kind = kind;
+    document.getElementById('msg').textContent = labels[kind] || 'Loading…';
+    document.getElementById('topic').textContent = topic;
+
+    function setStep(name) {
+      document.querySelectorAll('.load-steps li').forEach((li) => {
+        li.classList.toggle('active', li.dataset.step === name);
+        li.classList.toggle('done', ['guard', 'api', 'done'].indexOf(li.dataset.step) <
+          ['guard', 'api', 'done'].indexOf(name));
+      });
+    }
+
+    function fail(e) {
+      document.getElementById('err').textContent = e.message || String(e);
+      document.getElementById('err').classList.remove('hidden');
+      document.getElementById('back').classList.remove('hidden');
+      document.getElementById('lottieWrap')?.classList.add('hidden');
+      document.getElementById('etaWrap')?.classList.add('hidden');
+      document.getElementById('steps')?.classList.add('hidden');
+    }
+
+    (async () => {
+      const stopEta = startSimulatedEta(kind);
+      try {
+        setStep('guard');
+        await new Promise((r) => setTimeout(r, 400));
+        setStep('api');
+        const result = await loadResource(kind, topic);
+        setStep('done');
+        Store.result = result;
+        stopEta();
+        await new Promise((r) => setTimeout(r, 500));
+        if (kind === 'viva' || kind === 'screenReader') {
+          location.href = `live.html?mode=${result.liveMode || (kind === 'viva' ? 'viva' : 'screen')}`;
+        } else if (kind === 'chat') {
+          location.href = 'chat.html';
+        } else {
+          location.href = 'result.html';
+        }
+      } catch (e) {
+        stopEta();
+        fail(e);
+      }
+    })();
+  </script>
+</body>
+</html>

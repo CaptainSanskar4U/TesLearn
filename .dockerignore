@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.git/
+.cursor/
+spark_code/
+clips/
+podcasts/
+mindmaps/
+comics/
+notes/
+labs/
+app.db

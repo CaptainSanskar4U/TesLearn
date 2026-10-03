@@ -1,0 +1,14 @@
+.venv/
+.venv-fast/
+__pycache__/
+*.pyc
+.env
+app.db
+clips/
+podcasts/
+mindmaps/
+comics/
+notes/
+labs/
+.python-version
+spark_code

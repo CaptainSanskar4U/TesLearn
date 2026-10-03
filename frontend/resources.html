@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#3b82f6" />
+  <title>Resources — TesLearn</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <div class="mesh-bg" aria-hidden="true"></div>
+  <div class="shell content">
+    <div id="nav"></div>
+
+    <header style="margin-bottom:1.75rem">
+      <p class="kicker">Resources</p>
+      <h1 class="title-lg" id="topicLabel" style="margin-top:0.35rem">Your topic</h1>
+      <p class="muted" style="margin-top:0.5rem">Pick a format — each one is generated for your topic.</p>
+    </header>
+
+    <div class="resource-grid" id="grid"></div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/store.js"></script>
+  <script>
+    UI.mountNav({ backHref: 'index.html' });
+
+    const items = [
+      { kind: 'video', iconImg: 'video.png', title: 'Video', sub: 'Watch & understand' },
+      { kind: 'podcast', iconImg: 'podcast.png', title: 'Podcast', sub: 'Listen on the go' },
+      { kind: 'mindmap', iconImg: 'mindmap.png', title: 'Mindmap', sub: 'Visualize concepts' },
+      { kind: 'viva', iconImg: 'viva.png', title: 'Live Viva', sub: 'Oral exam practice' },
+      { kind: 'screenReader', iconImg: 'screnreader.png', title: 'Screen Reader', sub: 'Camera + voice help' },
+      { kind: 'lab', iconImg: 'lab.png', title: 'Virtual Lab', sub: 'Interactive lab' },
+      { kind: 'comic', iconImg: 'comic.png', title: 'Comic Book', sub: 'Visual story' },
+      { kind: 'notes', iconImg: 'notes.png', title: 'Notes', sub: 'Study-ready notes' },
+      { kind: 'chat', iconImg: 'chat.png', title: 'AI Chat', sub: 'Ask anything' },
+    ];
+
+    const topic = Store.topic;
+    if (!topic) location.href = 'index.html';
+    document.getElementById('topicLabel').textContent = topic;
+
+    const grid = document.getElementById('grid');
+    items.forEach((item) => {
+      const el = document.createElement('a');
+      el.className = 'tile card';
+      el.href = `loading.html?kind=${item.kind}`;
+      const iconHtml = item.iconImg
+        ? `<div class="tile-icon image"><img src="${item.iconImg}" alt="${item.title}" /></div>`
+        : `<div class="tile-icon">${item.icon}</div>`;
+      el.innerHTML = `
+        ${iconHtml}
+        <h3>${item.title}</h3>
+        <p>${item.sub}</p>`;
+      grid.appendChild(el);
+    });
+  </script>
+</body>
+</html>

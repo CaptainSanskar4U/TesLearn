@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtual Lab — Photosynthesis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            board: "#121826",
+            panel: "#1c2433",
+            card: "#2a3040",
+            border: "#3d4354",
+            muted: "#9aa3b5",
+            accent: "#e05d38",
+            sky: "#86a7c8",
+            water: "#4a90c8",
+            leaf: "#5a9e6f",
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"],
+            mono: ['"JetBrains Mono"', "monospace"],
+          },
+        },
+      },
+    };
+  </script>
+  <style>input[type="range"] { accent-color: #e05d38; }</style>
+</head>
+<body class="min-h-screen bg-board font-sans text-neutral-100 antialiased">
+  <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <header class="mb-5">
+      <h1 class="text-3xl font-extrabold tracking-tight">Photosynthesis Lab</h1>
+      <p class="mt-1 text-muted">Only two knobs: light and water. CO₂ stays steady in the air.</p>
+    </header>
+
+    <div id="banner" class="mb-4 rounded-xl border border-border bg-panel px-4 py-3" role="status" aria-live="polite">
+      <p id="bannerTitle" class="font-bold">Ready</p>
+      <p id="bannerBody" class="text-sm text-muted">Move the sliders, then press Run.</p>
+    </div>
+
+    <div class="grid gap-5 lg:grid-cols-[300px_1fr]">
+      <!-- LEFT controls -->
+      <aside class="order-2 space-y-5 rounded-2xl border border-border bg-panel p-5 lg:order-1">
+        <div>
+          <div class="mb-2 flex justify-between text-sm font-semibold">
+            <label for="sunlight">☀ Light</label>
+            <span id="sunVal" class="font-mono text-accent">70%</span>
+          </div>
+          <input id="sunlight" type="range" min="0" max="100" value="70" class="w-full" />
+        </div>
+
+        <div>
+          <div class="mb-2 flex justify-between text-sm font-semibold">
+            <label for="h2oIn">💧 Water</label>
+            <span id="h2oVal" class="font-mono text-water">50%</span>
+          </div>
+          <input id="h2oIn" type="range" min="0" max="100" value="50" class="w-full" />
+        </div>
+
+        <div class="rounded-xl border border-border bg-card p-3">
+          <div class="mb-1.5 flex justify-between text-sm">
+            <span>Food made (glucose)</span>
+            <span id="outPct" class="font-mono text-accent">0%</span>
+          </div>
+          <div class="h-2.5 overflow-hidden rounded-full bg-board">
+            <div id="outBar" class="h-full rounded-full bg-accent transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button id="runBtn" type="button" class="flex-1 rounded-xl bg-accent py-3 text-sm font-extrabold text-white hover:brightness-110">
+            Run
+          </button>
+          <button id="resetBtn" type="button" class="rounded-xl border border-border bg-card px-4 py-3 text-sm font-bold hover:bg-border/40">
+            Reset
+          </button>
+        </div>
+
+        <p id="tip" class="rounded-xl border border-dashed border-border bg-board px-3 py-3 text-sm text-muted">
+          Tip: set light high and water low — the smaller one limits the plant.
+        </p>
+      </aside>
+
+      <!-- RIGHT visual -->
+      <section class="order-1 overflow-hidden rounded-2xl border border-border bg-panel lg:order-2">
+        <div class="relative">
+          <svg class="block w-full bg-gradient-to-b from-[#1a2233] to-[#1e2a22]" viewBox="0 0 760 480" role="img" aria-label="Photosynthesis lab">
+            <g id="sun">
+              <circle cx="110" cy="90" r="42" fill="#e05d38" />
+              <g id="rays" stroke="#e8a090" stroke-width="5" stroke-linecap="round">
+                <line x1="110" y1="28" x2="110" y2="10" />
+                <line x1="155" y1="45" x2="172" y2="28" />
+                <line x1="172" y1="90" x2="190" y2="90" />
+                <line x1="155" y1="135" x2="172" y2="152" />
+                <line x1="110" y1="152" x2="110" y2="170" />
+                <line x1="65" y1="135" x2="48" y2="152" />
+                <line x1="48" y1="90" x2="30" y2="90" />
+                <line x1="65" y1="45" x2="48" y2="28" />
+              </g>
+            </g>
+            <path id="beam" d="M150 110 C250 140 320 180 390 230" stroke="#e8a090" stroke-width="3" stroke-dasharray="8 10" fill="none" />
+
+            <g id="plant">
+              <path d="M360 430 h90 l-12 -40 h-66 z" fill="#6b4f3a" />
+              <rect x="372" y="390" width="66" height="14" rx="3" fill="#8a6550" />
+              <path d="M405 390 C405 330 395 290 385 250" stroke="#3f7a52" stroke-width="12" fill="none" stroke-linecap="round" />
+              <path id="leafL" d="M385 270 C340 240 300 250 290 285 C330 300 360 300 385 270 Z" fill="#5a9e6f" />
+              <path id="leafR" d="M390 255 C450 220 510 235 525 280 C470 300 420 295 390 255 Z" fill="#6db07f" />
+              <path id="leafTop" d="M385 235 C360 190 390 150 430 165 C430 210 410 235 385 235 Z" fill="#7ec28f" />
+            </g>
+
+            <g id="waterChip" transform="translate(560 300)">
+              <ellipse cx="40" cy="34" rx="48" ry="28" fill="#2a3040" stroke="#4a90c8" stroke-width="2" />
+              <text x="40" y="40" text-anchor="middle" fill="#4a90c8" font-family="JetBrains Mono" font-size="18">H₂O</text>
+            </g>
+            <path id="h2oPath" d="M560 340 C500 350 450 330 420 300" stroke="#4a90c8" stroke-width="2" stroke-dasharray="6 8" fill="none" opacity="0.5" />
+
+            <g id="outChip" opacity="0.35">
+              <rect x="40" y="390" width="150" height="48" rx="10" fill="#2a3040" stroke="#e05d38" stroke-width="2" />
+              <text x="115" y="420" text-anchor="middle" fill="#eee" font-size="16" font-family="Plus Jakarta Sans" font-weight="700">Glucose ↑</text>
+            </g>
+
+            <circle id="p1" r="5" fill="#e05d38" opacity="0" />
+            <circle id="p2" r="5" fill="#4a90c8" opacity="0" />
+          </svg>
+
+          <div class="absolute bottom-4 left-4 right-4 rounded-xl border border-border/80 bg-panel/95 px-4 py-3">
+            <p id="callout" class="text-sm font-bold">Waiting for Run…</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const sunlight = $("sunlight");
+    const h2oIn = $("h2oIn");
+    const CO2 = 70; // fixed — not a user control
+
+    function rate() {
+      return Math.min(Number(sunlight.value), Number(h2oIn.value), CO2) / 100;
+    }
+
+    function limiter() {
+      const s = Number(sunlight.value);
+      const w = Number(h2oIn.value);
+      if (s <= w && s <= CO2) return "light";
+      if (w <= s && w <= CO2) return "water";
+      return "CO₂ (fixed air)";
+    }
+
+    function sync() {
+      $("sunVal").textContent = sunlight.value + "%";
+      $("h2oVal").textContent = h2oIn.value + "%";
+      const r = rate();
+      $("sun").style.opacity = String(0.3 + Number(sunlight.value) / 100 * 0.7);
+      $("rays").style.opacity = String(0.25 + Number(sunlight.value) / 100 * 0.75);
+      $("beam").style.opacity = String(0.15 + Number(sunlight.value) / 100 * 0.55);
+      $("waterChip").style.opacity = String(0.35 + Number(h2oIn.value) / 100 * 0.65);
+      const sat = 0.45 + r * 0.55;
+      ["leafL", "leafR", "leafTop"].forEach((id) => ($(id).style.filter = "saturate(" + sat + ")"));
+    }
+
+    function animateAlong(el, points, ms) {
+      const t0 = performance.now();
+      function frame(now) {
+        const t = Math.min(1, (now - t0) / ms);
+        const seg = Math.min(points.length - 2, Math.floor(t * (points.length - 1)));
+        const local = t * (points.length - 1) - seg;
+        const a = points[seg], b = points[seg + 1];
+        el.setAttribute("cx", a[0] + (b[0] - a[0]) * local);
+        el.setAttribute("cy", a[1] + (b[1] - a[1]) * local);
+        if (t < 1) requestAnimationFrame(frame);
+        else el.style.opacity = "0";
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function run() {
+      const r = rate();
+      const pct = Math.round(r * 100);
+      const lim = limiter();
+      $("outBar").style.width = pct + "%";
+      $("outPct").textContent = pct + "%";
+      $("outChip").style.opacity = String(0.3 + r * 0.7);
+
+      $("p1").style.opacity = "1";
+      animateAlong($("p1"), [[150, 110], [270, 160], [390, 230]], 700);
+      if (Number(h2oIn.value) > 10) {
+        $("p2").style.opacity = "1";
+        animateAlong($("p2"), [[560, 340], [490, 330], [420, 300]], 800);
+      }
+
+      const banner = $("banner");
+      if (pct < 15) {
+        banner.className = "mb-4 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3";
+        $("bannerTitle").textContent = "Almost nothing made";
+        $("bannerBody").textContent = "Raise " + lim + " — it’s too low.";
+        $("callout").textContent = "Plant stalled. Limited by " + lim + ".";
+        $("tip").textContent = "Fix: increase " + lim + ", then Run again.";
+      } else if (pct < 55) {
+        banner.className = "mb-4 rounded-xl border border-accent/40 bg-accent/10 px-4 py-3";
+        $("bannerTitle").textContent = "Some food made (" + pct + "%)";
+        $("bannerBody").textContent = "Limited by " + lim + ". Boost that to make more glucose.";
+        $("callout").textContent = "Working, but " + lim + " is holding it back.";
+        $("tip").textContent = "Try raising " + lim + " and keep the other slider the same.";
+      } else {
+        banner.className = "mb-4 rounded-xl border border-leaf/40 bg-leaf/10 px-4 py-3";
+        $("bannerTitle").textContent = "Strong photosynthesis (" + pct + "%)";
+        $("bannerBody").textContent = "Light and water are both high enough. Glucose is up!";
+        $("callout").textContent = "Healthy plant — lots of glucose.";
+        $("tip").textContent = "Now drop one slider low to see the limiting-factor rule.";
+      }
+    }
+
+    function reset() {
+      sunlight.value = 70;
+      h2oIn.value = 50;
+      $("outBar").style.width = "0%";
+      $("outPct").textContent = "0%";
+      $("outChip").style.opacity = "0.35";
+      $("banner").className = "mb-4 rounded-xl border border-border bg-panel px-4 py-3";
+      $("bannerTitle").textContent = "Ready";
+      $("bannerBody").textContent = "Move the sliders, then press Run.";
+      $("callout").textContent = "Waiting for Run…";
+      $("tip").textContent = "Tip: set light high and water low — the smaller one limits the plant.";
+      sync();
+    }
+
+    [sunlight, h2oIn].forEach((el) => el.addEventListener("input", sync));
+    $("runBtn").addEventListener("click", run);
+    $("resetBtn").addEventListener("click", reset);
+    sync();
+  </script>
+</body>
+</html>
