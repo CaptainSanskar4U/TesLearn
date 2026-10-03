@@ -2,14 +2,20 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+import os
+import tempfile
+
 ROOT = Path(__file__).resolve().parent
-CLIPS_DIR = ROOT / "clips"
-PODCASTS_DIR = ROOT / "podcasts"
-MINDMAPS_DIR = ROOT / "mindmaps"
-COMICS_DIR = ROOT / "comics"
-NOTES_DIR = ROOT / "notes"
-LABS_DIR = ROOT / "labs"
-DB_PATH = ROOT / "app.db"
+# Vercel serverless filesystem is read-only except /tmp — keep all
+# runtime writes (sqlite, generated clips/labs/...) there when deployed.
+DATA_ROOT = Path(tempfile.gettempdir()) / "teslearn-data" if os.getenv("VERCEL") else ROOT
+CLIPS_DIR = DATA_ROOT / "clips"
+PODCASTS_DIR = DATA_ROOT / "podcasts"
+MINDMAPS_DIR = DATA_ROOT / "mindmaps"
+COMICS_DIR = DATA_ROOT / "comics"
+NOTES_DIR = DATA_ROOT / "notes"
+LABS_DIR = DATA_ROOT / "labs"
+DB_PATH = DATA_ROOT / "app.db"
 PROMPTS_DIR = ROOT / "prompts"
 
 
@@ -36,9 +42,9 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-CLIPS_DIR.mkdir(exist_ok=True)
-PODCASTS_DIR.mkdir(exist_ok=True)
-MINDMAPS_DIR.mkdir(exist_ok=True)
-COMICS_DIR.mkdir(exist_ok=True)
-NOTES_DIR.mkdir(exist_ok=True)
-LABS_DIR.mkdir(exist_ok=True)
+CLIPS_DIR.mkdir(parents=True, exist_ok=True)
+PODCASTS_DIR.mkdir(parents=True, exist_ok=True)
+MINDMAPS_DIR.mkdir(parents=True, exist_ok=True)
+COMICS_DIR.mkdir(parents=True, exist_ok=True)
+NOTES_DIR.mkdir(parents=True, exist_ok=True)
+LABS_DIR.mkdir(parents=True, exist_ok=True)

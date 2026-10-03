@@ -1,0 +1,17 @@
+.git
+.venv/
+.venv-fast/
+__pycache__/
+*.pyc
+.env
+app.db
+clips/
+podcasts/
+mindmaps/
+comics/
+notes/
+labs/
+.vercel
+run.py
+scripts/
+uv.lock
