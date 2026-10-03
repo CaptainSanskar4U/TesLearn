@@ -1,5 +1,6 @@
 .venv/
 .venv-fast/
+.vercel/
 __pycache__/
 *.pyc
 .env
@@ -12,3 +13,4 @@ notes/
 labs/
 .python-version
 spark_code
+.vercel
